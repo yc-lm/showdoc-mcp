@@ -110,7 +110,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [
       {
         name: 'get_showdoc_content',
-        description: '从ShowDoc链接获取文档内容',
+        description: '从ShowDoc链接获取文档内容。user_token可通过参数传入，或从环境变量SHOWDOC_TOKEN读取',
         inputSchema: {
           type: 'object',
           properties: {
@@ -120,10 +120,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             user_token: {
               type: 'string',
-              description: '用户认证token',
+              description: '用户认证token（可选，默认使用环境变量SHOWDOC_TOKEN）',
             },
           },
-          required: ['url', 'user_token'],
+          required: ['url'],
         },
       },
     ],
@@ -139,13 +139,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   // 验证输入参数
-  if (!args || typeof args.url !== 'string' || typeof args.user_token !== 'string') {
+  if (!args || typeof args.url !== 'string') {
     return {
-      content: [{ type: 'text', text: '错误：缺少必要参数 url 或 user_token' }],
+      content: [{ type: 'text', text: '错误：缺少必要参数 url' }],
       isError: true,
     };
   }
-  const { url, user_token } = args;
+  const { url } = args;
+
+  // 获取 user_token：优先使用参数传入，否则使用环境变量
+  const user_token = (typeof args.user_token === 'string' ? args.user_token : '') || process.env.SHOWDOC_TOKEN || '';
+  if (!user_token) {
+    return {
+      content: [{ type: 'text', text: '错误：缺少 user_token。请通过参数传入或配置环境变量 SHOWDOC_TOKEN' }],
+      isError: true,
+    };
+  }
 
   // 解析URL
   const parsed = parseShowDocUrl(url);
