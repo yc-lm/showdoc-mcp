@@ -28,7 +28,7 @@ npm run build
     "showdoc": {
       "command": "node",
       "args": ["dist/index.js"],
-      "cwd": "E:/project/showdoc-mcp",
+      "cwd": "/path/to/showdoc-mcp",
       "env": {
         "SHOWDOC_TOKEN": "your_api_token_here"
       }
